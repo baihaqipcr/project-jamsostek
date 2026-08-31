@@ -16,7 +16,7 @@
 <body>
     <div class="kop">
         <div class="judul">KEMENTERIAN KESEJAHTERAAN SOSIAL</div>
-        <div>Direktorat Jenderal BPJS Ketenagakerjaan</div>
+        <div>BPJS Ketenagakerjaan</div>
         <hr />
         <h3>Surat Pemberitahuan 1 (SP1)</h3>
     </div>
