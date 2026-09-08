@@ -36,6 +36,15 @@ class PotensiCrudTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_unknown_page_renders_not_found(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/halaman-tidak-ada');
+
+        $response->assertNotFound();
+    }
+
     public function test_authenticated_user_can_create_potensi(): void
     {
         $user = User::factory()->create();

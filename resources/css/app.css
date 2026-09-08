@@ -1,3 +1,48 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        --color-navy: #0b2545;
+        --color-navy-deep: #07192e;
+        --color-teal: #0e7c66;
+        --color-green: #3b6d11;
+        --color-blue: #185fa5;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-slate-100 text-slate-800 antialiased;
+    }
+}
+
+@layer components {
+    .app-input {
+        @apply w-full rounded-lg border-slate-300 bg-white text-sm text-slate-800 shadow-sm
+            transition duration-150
+            focus:border-teal-600 focus:ring-2 focus:ring-teal-600/30;
+    }
+
+    .app-input-error {
+        @apply border-red-400 focus:border-red-500 focus:ring-red-500/30;
+    }
+}
+
+.page-enter-active,
+.page-leave-active {
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.page-enter-from {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.page-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+}

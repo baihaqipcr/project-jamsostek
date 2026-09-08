@@ -56,4 +56,16 @@ class StorePotensiRequest extends FormRequest
             'catatan' => 'catatan',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'required' => ':attribute wajib diisi.',
+            'in' => ':attribute tidak valid.',
+            'numeric' => ':attribute harus berupa angka.',
+            'integer' => ':attribute harus berupa bilangan bulat.',
+            'min' => ':attribute tidak boleh lebih kecil dari :min.',
+            'between' => ':attribute di luar rentang yang diizinkan.',
+        ];
+    }
 }

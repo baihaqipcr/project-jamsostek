@@ -31,16 +31,18 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Log in" />
+        <Head title="Masuk" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+        <h1 class="mb-1 text-xl font-bold text-navy-900">Masuk petugas</h1>
+        <p class="mb-6 text-sm text-slate-600">Gunakan akun bidang KSI untuk mencatat potensi.</p>
+
+        <div v-if="status" class="mb-4 text-sm font-medium text-emerald-600">
             {{ status }}
         </div>
 
         <form @submit.prevent="submit">
             <div>
                 <InputLabel for="email" value="Email" />
-
                 <TextInput
                     id="email"
                     type="email"
@@ -50,13 +52,11 @@ const submit = () => {
                     autofocus
                     autocomplete="username"
                 />
-
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
+                <InputLabel for="password" value="Kata sandi" />
                 <TextInput
                     id="password"
                     type="password"
@@ -65,34 +65,26 @@ const submit = () => {
                     required
                     autocomplete="current-password"
                 />
-
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
             <div class="mt-4 block">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
-                    >
+                    <span class="ms-2 text-sm text-slate-600">Ingat saya</span>
                 </label>
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="mt-6 flex items-center justify-between">
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    class="text-sm text-brand-teal hover:underline"
                 >
-                    Forgot your password?
+                    Lupa kata sandi?
                 </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Log in
+                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                    Masuk
                 </PrimaryButton>
             </div>
         </form>

@@ -13,7 +13,22 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Plus Jakarta Sans', 'Figtree', ...defaultTheme.fontFamily.sans],
+            },
+            colors: {
+                navy: {
+                    800: '#0b2545',
+                    900: '#07192e',
+                    950: '#051221',
+                },
+                brand: {
+                    teal: '#0e7c66',
+                    green: '#3b6d11',
+                    blue: '#185fa5',
+                },
+            },
+            boxShadow: {
+                card: '0 10px 40px -18px rgba(11, 37, 69, 0.18)',
             },
         },
     },

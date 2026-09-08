@@ -36,19 +36,15 @@ const updatePassword = () => {
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Update Password
-            </h2>
-
-            <p class="mt-1 text-sm text-gray-600">
-                Ensure your account is using a long, random password to stay
-                secure.
+            <h2 class="text-lg font-medium text-navy-900">Ubah kata sandi</h2>
+            <p class="mt-1 text-sm text-slate-600">
+                Gunakan kata sandi yang panjang dan tidak mudah ditebak.
             </p>
         </header>
 
         <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
             <div>
-                <InputLabel for="current_password" value="Current Password" />
+                <InputLabel for="current_password" value="Kata sandi saat ini" />
 
                 <TextInput
                     id="current_password"
@@ -66,7 +62,7 @@ const updatePassword = () => {
             </div>
 
             <div>
-                <InputLabel for="password" value="New Password" />
+                <InputLabel for="password" value="Kata sandi baru" />
 
                 <TextInput
                     id="password"
@@ -83,7 +79,7 @@ const updatePassword = () => {
             <div>
                 <InputLabel
                     for="password_confirmation"
-                    value="Confirm Password"
+                    value="Konfirmasi kata sandi"
                 />
 
                 <TextInput
@@ -101,7 +97,7 @@ const updatePassword = () => {
             </div>
 
             <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
+                <PrimaryButton :disabled="form.processing">Simpan</PrimaryButton>
 
                 <Transition
                     enter-active-class="transition ease-in-out"
@@ -113,7 +109,7 @@ const updatePassword = () => {
                         v-if="form.recentlySuccessful"
                         class="text-sm text-gray-600"
                     >
-                        Saved.
+                        Tersimpan.
                     </p>
                 </Transition>
             </div>
