@@ -18,6 +18,9 @@ Route::middleware('auth')->group(function () {
         Route::get('create', [PotensiController::class, 'create'])->name('create');
         Route::post('/', [PotensiController::class, 'store'])->name('store');
         Route::get('export', [PotensiController::class, 'export'])->name('export');
+        Route::get('template', [PotensiController::class, 'downloadTemplate'])->name('template');
+        Route::get('import', [PotensiController::class, 'importIndex'])->name('import');
+        Route::post('import', [PotensiController::class, 'import'])->name('import.store');
         Route::get('{potensi}/sp1', [PotensiController::class, 'downloadSp1'])->name('sp1');
         Route::get('{potensi}/edit', [PotensiController::class, 'edit'])->name('edit');
         Route::get('{potensi}', [PotensiController::class, 'show'])->name('show');

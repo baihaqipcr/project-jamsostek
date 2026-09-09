@@ -17,6 +17,7 @@ class Potensi extends Model
         'user_id',
         'tanggal_input',
         'nama_usaha',
+        'npwp',
         'segmen',
         'uraian',
         'alamat',

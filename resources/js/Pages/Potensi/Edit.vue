@@ -14,6 +14,7 @@ const toDate = (value) => (value ? String(value).slice(0, 10) : '');
 const form = useForm({
     tanggal_input: toDate(props.potensi.tanggal_input),
     nama_usaha: props.potensi.nama_usaha,
+    npwp: props.potensi.npwp ?? '',
     segmen: props.potensi.segmen,
     uraian: props.potensi.uraian,
     alamat: props.potensi.alamat,

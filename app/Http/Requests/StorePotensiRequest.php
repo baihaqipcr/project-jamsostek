@@ -24,6 +24,7 @@ class StorePotensiRequest extends FormRequest
         return [
             'tanggal_input' => ['required', 'date'],
             'nama_usaha' => ['required', 'string', 'max:255'],
+            'npwp' => ['nullable', 'string', 'max:20'],
             'segmen' => ['required', 'in:PU,BPU,Jakon'],
             'uraian' => ['required', 'string'],
             'alamat' => ['required', 'string', 'max:500'],
@@ -44,6 +45,7 @@ class StorePotensiRequest extends FormRequest
         return [
             'tanggal_input' => 'tanggal input',
             'nama_usaha' => 'nama usaha',
+            'npwp' => 'NPWP',
             'segmen' => 'segmen',
             'uraian' => 'uraian',
             'alamat' => 'alamat',

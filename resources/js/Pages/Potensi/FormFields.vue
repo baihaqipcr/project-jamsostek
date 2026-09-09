@@ -40,6 +40,19 @@ const statuses = ['Belum dihubungi', 'Sudah dihubungi', 'Jadi peserta', 'Ditolak
             <InputError class="mt-1" :message="form.errors.nama_usaha" />
         </div>
         <div>
+            <InputLabel for="npwp" value="NPWP" />
+            <input
+                id="npwp"
+                v-model="form.npwp"
+                type="text"
+                maxlength="20"
+                placeholder="Contoh: 123456789012345"
+                class="app-input mt-1"
+                :class="{ 'app-input-error': form.errors.npwp }"
+            />
+            <InputError class="mt-1" :message="form.errors.npwp" />
+        </div>
+        <div>
             <InputLabel for="segmen" value="Segmen" />
             <select
                 id="segmen"

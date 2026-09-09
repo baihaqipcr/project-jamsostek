@@ -5,6 +5,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 const form = useForm({
     tanggal_input: new Date().toISOString().slice(0, 10),
     nama_usaha: '',
+    npwp: '',
     segmen: '',
     uraian: '',
     alamat: '',

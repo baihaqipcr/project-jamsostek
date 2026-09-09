@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Exports\PotensiExport;
+use App\Exports\PotensiTemplateExport;
 use App\Http\Requests\StorePotensiRequest;
 use App\Models\Potensi;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -145,6 +150,170 @@ class PotensiController extends Controller
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="potensi.xlsx"',
         ]);
+    }
+
+    public function importIndex(): Response
+    {
+        return Inertia::render('Potensi/Import');
+    }
+
+    public function downloadTemplate()
+    {
+        if (class_exists(\Maatwebsite\Excel\Facades\Excel::class)) {
+            return \Maatwebsite\Excel\Facades\Excel::download(new PotensiTemplateExport, 'template-import-potensi.xlsx');
+        }
+
+        // Graceful fallback if the Excel package is unavailable.
+        $headings = ['NPWP', 'Tanggal Input', 'Nama Usaha', 'Segmen', 'Uraian', 'Alamat', 'Latitude', 'Longitude', 'Estimasi TK', 'Estimasi Upah', 'Estimasi Iuran', 'Program', 'Status Tindak Lanjut', 'Catatan'];
+
+        $content = implode(',', array_map(fn ($h) => '"'.str_replace('"', '""', $h).'"', $headings));
+
+        return response($content, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="template-import-potensi.xlsx"',
+        ]);
+    }
+
+    public function import(Request $request): JsonResponse
+    {
+        $request->validate([
+            'rows' => ['required', 'array', 'min:1'],
+        ]);
+
+        $rows = $request->input('rows');
+        $errors = [];
+        $created = 0;
+        $updated = 0;
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($rows as $index => $row) {
+                // +2: row 1 is the Excel header.
+                $rowNumber = $index + 2;
+
+                try {
+                    $data = $this->validateImportRow($row);
+
+                    $programs = $data['programs'] ?? [];
+                    unset($data['programs']);
+
+                    $data['user_id'] = Auth::id();
+                    $data['status_tindak_lanjut'] = $data['status_tindak_lanjut'] ?? 'Belum dihubungi';
+
+                    // Treat empty optional strings as null for nullable columns.
+                    foreach (['latitude', 'longitude', 'catatan'] as $nullable) {
+                        if (array_key_exists($nullable, $data) && $data[$nullable] === '') {
+                            $data[$nullable] = null;
+                        }
+                    }
+
+                    // Upsert keyed on NPWP to avoid duplicate business records.
+                    $potensi = Potensi::updateOrCreate(
+                        ['npwp' => $data['npwp']],
+                        $data
+                    );
+
+                    $this->syncProgramPotensi($potensi, $programs);
+
+                    if ($potensi->wasRecentlyCreated) {
+                        $created++;
+                    } else {
+                        $updated++;
+                    }
+                } catch (ValidationException $e) {
+                    $errors[] = [
+                        'row' => $rowNumber,
+                        'message' => $e->validator->errors()->first(),
+                    ];
+                } catch (\Throwable $e) {
+                    $errors[] = [
+                        'row' => $rowNumber,
+                        'message' => 'Gagal menyimpan data: '.$e->getMessage(),
+                    ];
+                }
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Gagal memproses file: '.$e->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'created' => $created,
+            'updated' => $updated,
+            'errors' => $errors,
+        ]);
+    }
+
+    protected function validateImportRow(array $row): array
+    {
+        $validator = Validator::make($row, [
+            'npwp' => ['required', 'string', 'max:20'],
+            'tanggal_input' => ['required', 'date'],
+            'nama_usaha' => ['required', 'string', 'max:255'],
+            'segmen' => ['required', 'in:PU,BPU,Jakon'],
+            'uraian' => ['required', 'string'],
+            'alamat' => ['required', 'string', 'max:500'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'estimasi_tk' => ['required', 'integer', 'min:1'],
+            'estimasi_upah' => ['required', 'numeric', 'min:0'],
+            'estimasi_iuran' => ['required', 'numeric', 'min:0'],
+            'programs' => ['nullable', 'array'],
+            'programs.*' => ['string', 'in:JKK,JKM,JHT,JP'],
+            'status_tindak_lanjut' => ['nullable', 'string', 'max:255'],
+            'catatan' => ['nullable', 'string'],
+        ], [
+            'required' => ':attribute wajib diisi.',
+            'in' => ':attribute tidak valid.',
+            'numeric' => ':attribute harus berupa angka.',
+            'integer' => ':attribute harus berupa bilangan bulat.',
+            'min' => ':attribute tidak boleh lebih kecil dari :min.',
+            'between' => ':attribute di luar rentang yang diizinkan.',
+            'date' => ':attribute harus berupa tanggal.',
+        ], [
+            'npwp' => 'NPWP',
+            'tanggal_input' => 'tanggal input',
+            'nama_usaha' => 'nama usaha',
+            'segmen' => 'segmen',
+            'uraian' => 'uraian',
+            'alamat' => 'alamat',
+            'latitude' => 'latitude',
+            'longitude' => 'longitude',
+            'estimasi_tk' => 'estimasi tenaga kerja',
+            'estimasi_upah' => 'estimasi upah',
+            'estimasi_iuran' => 'estimasi iuran',
+            'status_tindak_lanjut' => 'status tindak lanjut',
+            'catatan' => 'catatan',
+        ]);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        $validated = $validator->validated();
+
+        // Normalize NPWP to 15 digits and enforce the exact length.
+        if (isset($validated['npwp'])) {
+            $validated['npwp'] = preg_replace('/\D/', '', $validated['npwp']);
+
+            $npwpValidator = Validator::make(['npwp' => $validated['npwp']], [
+                'npwp' => ['required', 'digits:15'],
+            ], [
+                'digits' => 'NPWP harus 15 digit angka.',
+            ]);
+
+            if ($npwpValidator->fails()) {
+                throw new ValidationException($npwpValidator);
+            }
+        }
+
+        return $validated;
     }
 
     protected function syncProgramPotensi(Potensi $potensi, array $programs): void
