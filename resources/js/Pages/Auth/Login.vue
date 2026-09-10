@@ -33,20 +33,23 @@ const submit = () => {
     <GuestLayout>
         <Head title="Masuk" />
 
-        <h1 class="mb-1 text-xl font-bold text-navy-900">Masuk petugas</h1>
-        <p class="mb-6 text-sm text-slate-600">Gunakan akun bidang KSI untuk mencatat potensi.</p>
+        <div class="auth-reveal auth-delay-1">
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-[#087a43]">Ruang kerja KSI</p>
+            <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-[#3AB44A]">Masuk petugas</h1>
+            <p class="mt-2 mb-6 text-sm leading-6 text-slate-600">Gunakan akun bidang KSI untuk mencatat potensi.</p>
+        </div>
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-emerald-600">
+        <div v-if="status" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-sm font-medium text-emerald-700">
             {{ status }}
         </div>
 
         <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
+            <div class="auth-reveal auth-delay-2">
+                <InputLabel for="email" value="Email (KSI)" class="auth-label" />
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="auth-input mt-1 block w-full"
                     v-model="form.email"
                     required
                     autofocus
@@ -55,12 +58,12 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Kata sandi" />
+            <div class="auth-reveal auth-delay-3 mt-4">
+                <InputLabel for="password" value="Kata sandi" class="auth-label" />
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="auth-input mt-1 block w-full"
                     v-model="form.password"
                     required
                     autocomplete="current-password"
@@ -68,24 +71,30 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4 block">
+            <div class="auth-reveal auth-delay-4 mt-4 block">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
                     <span class="ms-2 text-sm text-slate-600">Ingat saya</span>
                 </label>
             </div>
 
-            <div class="mt-6 flex items-center justify-between">
+            <div class="auth-reveal auth-delay-5 mt-6 flex flex-col gap-4">
+                <div class="flex items-center justify-between gap-4">
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="text-sm text-brand-teal hover:underline"
+                    class="text-sm font-semibold text-[#05ADDC] transition hover:text-[#087a43] hover:underline"
                 >
                     Lupa kata sandi?
                 </Link>
-                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                <PrimaryButton class="auth-primary-button" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                     Masuk
                 </PrimaryButton>
+                </div>
+                <p class="text-center text-sm text-slate-600">
+                    Belum punya akun?
+                    <Link :href="route('register')" class="font-bold text-[#05ADDC] transition hover:text-[#087a43]">Daftar</Link>
+                </p>
             </div>
         </form>
     </GuestLayout>

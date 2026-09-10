@@ -5,18 +5,21 @@ import { ChevronRight, LogOut, Menu } from '@lucide/vue';
 
 const showingSidebar = defineModel('sidebar', { type: Boolean, default: false });
 const page = usePage();
+const currentPath = computed(() => page.url.split('?')[0]);
 
 const crumbs = computed(() => {
     const items = [{ label: 'Beranda', href: route('potensi.index') }];
 
-    if (route().current('potensi.create')) {
+    if (currentPath.value === '/potensi/create') {
         items.push({ label: 'Tambah Potensi' });
-    } else if (route().current('potensi.edit')) {
+    } else if (/^\/potensi\/\d+\/edit$/.test(currentPath.value)) {
         items.push({ label: 'Daftar Potensi', href: route('potensi.index') });
         items.push({ label: 'Ubah Data' });
-    } else if (route().current('potensi.show')) {
+    } else if (/^\/potensi\/\d+$/.test(currentPath.value)) {
         items.push({ label: 'Daftar Potensi', href: route('potensi.index') });
         items.push({ label: 'Detail Potensi' });
+    } else if (currentPath.value === '/potensi/import') {
+        items.push({ label: 'Impor Potensi' });
     } else if (route().current('profile.edit')) {
         items.push({ label: 'Profil Petugas' });
     } else {

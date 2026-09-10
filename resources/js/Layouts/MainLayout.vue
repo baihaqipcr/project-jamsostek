@@ -6,6 +6,7 @@ import Topbar from '@/Components/Topbar.vue';
 import SplashScreen from '@/Components/SplashScreen.vue';
 
 const showingSidebar = ref(false);
+const sidebarCollapsed = ref(false);
 const showingSplash = ref(false);
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
@@ -38,9 +39,9 @@ onMounted(() => {
             <SplashScreen v-if="showingSplash" :name="user?.name" />
         </Transition>
 
-        <Sidebar v-model="showingSidebar" />
+        <Sidebar v-model="showingSidebar" v-model:collapsed="sidebarCollapsed" />
 
-        <div class="lg:pl-72">
+        <div class="transition-[padding] duration-300" :class="sidebarCollapsed ? 'lg:pl-0' : 'lg:pl-72'">
             <Topbar v-model:sidebar="showingSidebar" />
 
             <main class="px-4 py-6 sm:px-6 lg:px-8">

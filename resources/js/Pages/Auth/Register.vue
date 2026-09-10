@@ -24,14 +24,20 @@ const submit = () => {
     <GuestLayout>
         <Head title="Register" />
 
+        <div class="auth-reveal auth-delay-1">
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-[#087a43]">Akses petugas</p>
+            <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-[#3AB44A]">Daftar petugas</h1>
+            <p class="mt-2 mb-6 text-sm leading-6 text-slate-600">Buat akun bidang KSI untuk mencatat potensi.</p>
+        </div>
+
         <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="name" value="Name" />
+            <div class="auth-reveal auth-delay-2">
+                <InputLabel for="name" value="Nama Lengkap" class="auth-label" />
 
                 <TextInput
                     id="name"
                     type="text"
-                    class="mt-1 block w-full"
+                    class="auth-input mt-1 block w-full"
                     v-model="form.name"
                     required
                     autofocus
@@ -41,13 +47,13 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.name" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="email" value="Email" />
+            <div class="auth-reveal auth-delay-3 mt-4">
+                <InputLabel for="email" value="Email (KSI)" class="auth-label" />
 
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="auth-input mt-1 block w-full"
                     v-model="form.email"
                     required
                     autocomplete="username"
@@ -56,13 +62,13 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+            <div class="auth-reveal auth-delay-4 mt-4">
+                <InputLabel for="password" value="Kata Sandi" class="auth-label" />
 
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="auth-input mt-1 block w-full"
                     v-model="form.password"
                     required
                     autocomplete="new-password"
@@ -71,16 +77,16 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4">
+            <div class="auth-reveal auth-delay-5 mt-4">
                 <InputLabel
                     for="password_confirmation"
-                    value="Confirm Password"
+                    value="Konfirmasi Kata Sandi"
                 />
 
                 <TextInput
                     id="password_confirmation"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="auth-input mt-1 block w-full"
                     v-model="form.password_confirmation"
                     required
                     autocomplete="new-password"
@@ -92,21 +98,23 @@ const submit = () => {
                 />
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="auth-reveal auth-delay-6 mt-6 flex flex-col gap-4">
+                <div class="flex flex-col-reverse items-center justify-between gap-3 sm:flex-row">
                 <Link
                     :href="route('login')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    class="text-sm font-semibold text-[#05ADDC] transition hover:text-[#087a43] hover:underline"
                 >
-                    Already registered?
+                    Sudah punya akun? Masuk
                 </Link>
 
                 <PrimaryButton
-                    class="ms-4"
+                    class="auth-primary-button"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
-                    Register
+                    Daftar petugas
                 </PrimaryButton>
+                </div>
             </div>
         </form>
     </GuestLayout>

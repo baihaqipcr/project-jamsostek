@@ -1,9 +1,10 @@
 <script setup>
 import Pagination from '@/Components/Pagination.vue';
 import DownloadTemplateButton from '@/Components/DownloadTemplateButton.vue';
+import EmptyPotensiState from '@/Components/EmptyPotensiState.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-import { ArrowUpRight, FileDown, Filter, Plus, Sparkles, UsersRound } from '@lucide/vue';
+import { ArrowUpRight, FileDown, Filter, Plus, Sparkles, TrendingUp, Wallet, UsersRound } from '@lucide/vue';
 
 const props = defineProps({
     potensis: {
@@ -132,21 +133,22 @@ const formatNumber = (value) => Number(value || 0).toLocaleString('id-ID');
     </div>
 
     <div class="mb-5 grid gap-4 sm:grid-cols-3">
-        <div class="glass-panel rounded-2xl p-4">
+        <div class="dashboard-card glass-panel rounded-2xl p-4">
             <div class="flex items-start justify-between gap-3 text-sm text-slate-500">
                 <span>Potensi aktif</span>
+                <span class="card-icon-badge"><TrendingUp class="h-4 w-4" /></span>
                 <select v-model="calculationMode" class="card-mode-select" aria-label="Mode perhitungan potensi aktif">
                     <option value="page">Halaman Ini</option>
-                    <option value="filtered">Sesuai Filter</option>
                     <option value="all">Keseluruhan</option>
                 </select>
             </div>
             <strong class="mt-2 block text-2xl text-navy-900">{{ formatNumber(selectedCount) }}</strong>
             <span class="text-xs text-slate-500">{{ calculationSubtitle }}</span>
         </div>
-        <div class="glass-panel rounded-2xl p-4">
+        <div class="dashboard-card glass-panel rounded-2xl p-4">
             <div class="flex items-start justify-between gap-3 text-sm text-slate-500">
                 <span>Estimasi iuran</span>
+            <span class="card-icon-badge card-icon-green"><Wallet class="h-4 w-4" /></span>
                 <select v-model="calculationMode" class="card-mode-select" aria-label="Mode perhitungan estimasi iuran">
                     <option value="page">Halaman Ini</option>
                     <option value="filtered">Sesuai Filter</option>
@@ -156,8 +158,8 @@ const formatNumber = (value) => Number(value || 0).toLocaleString('id-ID');
             <strong class="mt-2 block text-2xl text-navy-900">Rp {{ formatNumber(selectedIuran) }}</strong>
             <span class="text-xs text-slate-500">{{ calculationSubtitle }}</span>
         </div>
-        <div class="glass-panel rounded-2xl p-4">
-            <div class="flex items-center justify-between text-sm text-slate-500"><span>Status pantauan</span><Sparkles class="h-4 w-4 text-[#087a43]" /></div>
+        <div class="dashboard-card glass-panel rounded-2xl p-4">
+            <div class="flex items-center justify-between text-sm text-slate-500"><span>Status pantauan</span><span class="card-icon-badge card-icon-lime"><Sparkles class="h-4 w-4" /></span></div>
             <strong class="mt-2 block truncate text-2xl text-navy-900">{{ filters.status || 'Semua' }}</strong>
             <span class="text-xs text-slate-500">filter yang sedang aktif</span>
         </div>
@@ -233,7 +235,9 @@ const formatNumber = (value) => Number(value || 0).toLocaleString('id-ID');
                         </td>
                     </tr>
                     <tr v-if="!potensis.data.length">
-                        <td colspan="7" class="px-4 py-10 text-center text-slate-500">Belum ada data potensi.</td>
+                        <td colspan="7" class="p-0">
+                            <EmptyPotensiState />
+                        </td>
                     </tr>
                 </tbody>
             </table>

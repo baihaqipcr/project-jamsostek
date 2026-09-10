@@ -21,9 +21,9 @@
     body {
         @apply text-slate-800 antialiased;
         background:
-            radial-gradient(circle at 8% 12%, rgba(58, 180, 74, 0.16), transparent 30rem),
-            radial-gradient(circle at 92% 4%, rgba(5, 173, 220, 0.13), transparent 28rem),
-            linear-gradient(135deg, #f8fcf8 0%, #f3f9f7 48%, #f8fbec 100%);
+            radial-gradient(circle at 8% 16%, rgba(5, 173, 220, 0.15), transparent 28rem),
+            radial-gradient(circle at 92% 82%, rgba(214, 230, 93, 0.2), transparent 30rem),
+            linear-gradient(135deg, #f8fafc 0%, #f5faf8 48%, #fbfdf5 100%);
         background-attachment: fixed;
     }
 
@@ -38,7 +38,44 @@
 
 @layer components {
     .glass-panel {
-        @apply border border-white/70 bg-white/55 shadow-xl shadow-emerald-950/5 backdrop-blur-xl;
+        @apply border border-white/90 bg-white/80 shadow-xl shadow-slate-200/50 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl;
+    }
+
+    .sidebar-surface {
+        background:
+            radial-gradient(circle at 88% 8%, rgba(214, 230, 93, 0.28), transparent 13rem),
+            radial-gradient(circle at 12% 78%, rgba(5, 173, 220, 0.3), transparent 18rem),
+            linear-gradient(160deg, #087a43 0%, #087a62 42%, #05addc 125%);
+        background-attachment: fixed;
+    }
+
+    .sidebar-navigation {
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
+        overscroll-behavior: contain;
+    }
+
+    .sidebar-navigation:hover,
+    .sidebar-navigation:focus-within {
+        scrollbar-color: rgba(214, 230, 93, 0.7) transparent;
+    }
+
+    .sidebar-navigation::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar-navigation::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .sidebar-navigation::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: transparent;
+    }
+
+    .sidebar-navigation:hover::-webkit-scrollbar-thumb,
+    .sidebar-navigation:focus-within::-webkit-scrollbar-thumb {
+        background: rgba(214, 230, 93, 0.7);
     }
 
         .interactive-button {
@@ -58,12 +95,72 @@
     .app-input-error {
         @apply border-red-400 focus:border-red-500 focus:ring-red-500/30;
     }
+
+    .auth-label {
+        @apply text-sm font-semibold text-slate-700;
+    }
+
+    .auth-input {
+        @apply rounded-xl border-white/80 bg-white/55 px-4 py-3 shadow-sm backdrop-blur transition duration-200 placeholder:text-slate-400 focus:border-[#05ADDC] focus:bg-white/75 focus:ring-4 focus:ring-[#05ADDC]/20;
+    }
+
+    .auth-primary-button {
+        @apply inline-flex items-center justify-center rounded-xl bg-[#087A43] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-900/15 transition duration-200 hover:-translate-y-0.5 hover:bg-[#056B39] hover:shadow-[#05ADDC]/25 active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-[#05ADDC]/25 focus:ring-offset-2;
+    }
 }
+
+.auth-shell {
+    background:
+        radial-gradient(circle at 12% 14%, rgba(214, 230, 93, 0.66), transparent 22rem),
+        linear-gradient(135deg, #effbf0 0%, #eefbfd 52%, #fbfdea 100%);
+}
+
+.auth-shell::before {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(58, 180, 74, 0.08), transparent 42%, rgba(5, 173, 220, 0.1));
+    content: '';
+}
+
+.auth-glass-card {
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.3));
+    box-shadow: 0 28px 80px rgba(7, 73, 47, 0.14), inset 0 1px rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+}
+
+.auth-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(2px);
+    opacity: 0.72;
+    pointer-events: none;
+}
+
+.auth-orb-green { width: 26rem; height: 26rem; left: -13rem; bottom: -12rem; background: rgba(58, 180, 74, 0.48); }
+.auth-orb-cyan { width: 23rem; height: 23rem; right: -11rem; top: -8rem; background: rgba(5, 173, 220, 0.42); }
+.auth-orb-lime { width: 13rem; height: 13rem; right: 18%; bottom: 8%; background: rgba(214, 230, 93, 0.3); }
+.auth-cursor-glow { position: fixed; z-index: 20; top: 0; left: 0; width: 220px; height: 220px; border-radius: 999px; background: radial-gradient(circle, rgba(5, 173, 220, 0.2), rgba(5, 173, 220, 0) 68%); filter: blur(7px); pointer-events: none; transition: opacity 180ms ease; }
+.animate-auth-panel { animation: auth-panel-enter 650ms cubic-bezier(.22, 1, .36, 1) both; }
+.auth-reveal { animation: auth-reveal 520ms cubic-bezier(.22, 1, .36, 1) both; }
+.auth-delay-1 { animation-delay: 80ms; }
+.auth-delay-2 { animation-delay: 150ms; }
+.auth-delay-3 { animation-delay: 220ms; }
+.auth-delay-4 { animation-delay: 290ms; }
+.auth-delay-5 { animation-delay: 360ms; }
+.auth-delay-6 { animation-delay: 430ms; }
+
+@keyframes auth-panel-enter { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes auth-reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.auth-page-enter-active, .auth-page-leave-active { transition: opacity 180ms ease, transform 180ms ease; }
+.auth-page-enter-from { opacity: 0; transform: translateX(10px); }
+.auth-page-leave-to { opacity: 0; transform: translateX(-10px); }
 
 .dashboard-hero {
     position: relative;
     isolation: isolate;
-    background: linear-gradient(120deg, #12342a 0%, #087a43 48%, #05addc 140%);
+    background: linear-gradient(120deg, #3ab44a 0%, #087a43 48%, #05addc 140%);
 }
 
 .dashboard-hero-orb {
@@ -101,6 +198,11 @@
 
 .hero-mini-stat span { display: block; color: rgba(255, 255, 255, 0.62); font-size: 0.7rem; }
 .hero-mini-stat strong { display: block; margin-top: 0.2rem; font-size: 1.35rem; }
+.dashboard-card { position: relative; }
+.card-icon-badge { display: inline-flex; height: 2rem; width: 2rem; align-items: center; justify-content: center; border-radius: 0.75rem; background: rgba(5, 173, 220, 0.1); color: #05addc; }
+.card-icon-green { background: rgba(58, 180, 74, 0.1); color: #3ab44a; }
+.card-icon-lime { background: rgba(214, 230, 93, 0.28); color: #6d8311; }
+.empty-state-icon { box-shadow: 0 0 0 10px rgba(5, 173, 220, 0.04), 0 12px 30px rgba(5, 173, 220, 0.12); }
 .table-row-reveal { animation: table-row-reveal 420ms both; }
 
 @keyframes table-row-reveal {
