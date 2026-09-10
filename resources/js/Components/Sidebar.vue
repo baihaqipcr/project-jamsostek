@@ -4,6 +4,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     ClipboardList,
     FileSpreadsheet,
+    FileUp,
     Plus,
     UserRound,
     X,
@@ -25,6 +26,12 @@ const links = computed(() => [
         href: route('potensi.create'),
         active: route().current('potensi.create'),
         icon: Plus,
+    },
+    {
+        label: 'Impor Potensi',
+        href: route('potensi.import'),
+        active: route().current('potensi.import'),
+        icon: FileUp,
     },
     {
         label: 'Profil Petugas',

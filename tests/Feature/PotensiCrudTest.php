@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Potensi;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
 
 class PotensiCrudTest extends TestCase
@@ -158,5 +159,181 @@ class PotensiCrudTest extends TestCase
         $this->assertTrue(
             str_contains($response->headers->get('Content-Type'), 'application/vnd.openxmlformats-officedocument')
         );
+    }
+
+    public function test_export_matches_the_import_template_structure(): void
+    {
+        $user = User::factory()->create();
+        $potensi = Potensi::create([
+            'user_id' => $user->id,
+            'tanggal_input' => '2026-09-10',
+            'nama_usaha' => 'Usaha Export Terstandar',
+            'npwp' => '123456789012345',
+            'segmen' => 'PU',
+            'uraian' => 'Bidang usaha export',
+            'alamat' => 'Jl. Export No. 10',
+            'latitude' => -6.2000000,
+            'longitude' => 106.8500000,
+            'estimasi_tk' => 12,
+            'estimasi_upah' => 12500000,
+            'estimasi_iuran' => 1250000,
+            'status_tindak_lanjut' => 'Belum dihubungi',
+            'catatan' => 'Catatan export',
+        ]);
+        $potensi->programPotensi()->createMany([
+            ['jenis_program' => 'JKK'],
+            ['jenis_program' => 'JKP'],
+        ]);
+
+        $response = $this->actingAs($user)->get(route('potensi.export'));
+        $path = tempnam(sys_get_temp_dir(), 'potensi-export-');
+        file_put_contents($path, $response->streamedContent());
+
+        try {
+            $sheet = IOFactory::load($path)->getActiveSheet();
+
+            $this->assertSame([
+                'Tanggal Input',
+                'Nama Usaha / Perusahaan',
+                'NPWP',
+                'Segmen',
+                'Uraian / Bidang Usaha',
+                'Alamat Lengkap',
+                'Latitude',
+                'Longitude',
+                'Estimasi Tenaga Kerja',
+                'Estimasi Upah',
+                'Estimasi Iuran',
+                'Program JKK, JKM, JHT, JP, JKP',
+                'Status Tindak Lanjut',
+                'Catatan',
+            ], $sheet->rangeToArray('A1:N1', null, true, false)[0]);
+            $this->assertSame('Usaha Export Terstandar', $sheet->getCell('B2')->getValue());
+            $this->assertSame('JKK, JKP', $sheet->getCell('L2')->getValue());
+            $this->assertSame('yyyy-mm-dd', $sheet->getStyle('A2')->getNumberFormat()->getFormatCode());
+            $this->assertSame('A2', $sheet->getFreezePane());
+            $this->assertSame('0E7C66', $sheet->getStyle('A1')->getFill()->getStartColor()->getRGB());
+        } finally {
+            unlink($path);
+        }
+    }
+
+    public function test_user_can_only_see_their_own_potensi(): void
+    {
+        $owner = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $potensi = Potensi::create([
+            'user_id' => $owner->id,
+            'tanggal_input' => '2026-08-31',
+            'nama_usaha' => 'Data Milik Owner',
+            'segmen' => 'PU',
+            'uraian' => 'Data privat',
+            'alamat' => 'Jl. Owner No. 1',
+            'estimasi_tk' => 5,
+            'estimasi_upah' => 5000000,
+            'estimasi_iuran' => 500000,
+        ]);
+
+        $index = $this->actingAs($otherUser)->get('/potensi');
+        $index->assertOk();
+        $this->assertStringNotContainsString('Data Milik Owner', $index->getContent());
+
+        $this->actingAs($otherUser)->get(route('potensi.show', $potensi))->assertNotFound();
+        $this->actingAs($otherUser)->get(route('potensi.edit', $potensi))->assertNotFound();
+        $this->actingAs($otherUser)->get(route('potensi.sp1', $potensi))->assertNotFound();
+        $this->actingAs($otherUser)->put(route('potensi.update', $potensi), [
+            'tanggal_input' => '2026-08-31',
+            'nama_usaha' => 'Percobaan Perubahan',
+            'segmen' => 'PU',
+            'uraian' => 'Tidak boleh berubah',
+            'alamat' => 'Jl. Lain',
+            'estimasi_tk' => 1,
+            'estimasi_upah' => 1,
+            'estimasi_iuran' => 1,
+        ])->assertNotFound();
+        $this->actingAs($otherUser)->delete(route('potensi.destroy', $potensi))->assertNotFound();
+
+        $this->assertDatabaseHas('potensi', [
+            'id' => $potensi->id,
+            'user_id' => $owner->id,
+            'nama_usaha' => 'Data Milik Owner',
+        ]);
+    }
+
+    public function test_export_only_contains_the_authenticated_users_potensi(): void
+    {
+        $owner = User::factory()->create();
+        $otherUser = User::factory()->create();
+        Potensi::create([
+            'user_id' => $owner->id,
+            'tanggal_input' => '2026-08-31',
+            'nama_usaha' => 'Data Export Privat',
+            'segmen' => 'PU',
+            'uraian' => 'Data privat',
+            'alamat' => 'Jl. Export No. 1',
+            'estimasi_tk' => 5,
+            'estimasi_upah' => 5000000,
+            'estimasi_iuran' => 500000,
+        ]);
+
+        $response = $this->actingAs($otherUser)->get(route('potensi.export'));
+
+        $response->assertOk();
+        $this->assertStringNotContainsString('Data Export Privat', $response->getContent());
+    }
+
+    public function test_authenticated_user_can_download_the_import_template(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('potensi.template'));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Disposition', 'attachment; filename=Template_Import_Potensi_KSI.xlsx');
+        $this->assertStringContainsString(
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            $response->headers->get('Content-Type')
+        );
+        $this->assertStringStartsWith('PK', $response->streamedContent());
+    }
+
+    public function test_authenticated_user_can_import_rows_without_npwp(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->postJson(route('potensi.import.store'), [
+            'rows' => [
+                [
+                    'tanggal_input' => '2026-09-10',
+                    'nama_usaha' => 'Usaha Import Satu',
+                    'npwp' => '',
+                    'segmen' => 'PU',
+                    'uraian' => 'Uraian satu',
+                    'alamat' => 'Alamat satu',
+                    'estimasi_tk' => 10,
+                    'estimasi_upah' => 1000000,
+                    'estimasi_iuran' => 100000,
+                    'programs' => ['JKP'],
+                ],
+                [
+                    'tanggal_input' => '2026-09-10',
+                    'nama_usaha' => 'Usaha Import Dua',
+                    'npwp' => '',
+                    'segmen' => 'BPU',
+                    'uraian' => 'Uraian dua',
+                    'alamat' => 'Alamat dua',
+                    'estimasi_tk' => 5,
+                    'estimasi_upah' => 500000,
+                    'estimasi_iuran' => 50000,
+                    'programs' => ['JKK', 'JKP'],
+                ],
+            ],
+        ]);
+
+        $response->assertOk()->assertJson(['created' => 2, 'updated' => 0, 'errors' => []]);
+        $this->assertDatabaseCount('potensi', 2);
+        $this->assertDatabaseHas('potensi', ['nama_usaha' => 'Usaha Import Satu', 'user_id' => $user->id]);
+        $this->assertDatabaseHas('potensi', ['nama_usaha' => 'Usaha Import Dua', 'user_id' => $user->id]);
+        $this->assertDatabaseHas('program_potensi', ['jenis_program' => 'JKP']);
     }
 }

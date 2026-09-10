@@ -21,7 +21,7 @@ class PotensiController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = Potensi::query()
+        $query = Potensi::where('user_id', Auth::id())
             ->with(['user', 'programPotensi'])
             ->latest();
 
@@ -59,8 +59,9 @@ class PotensiController extends Controller
         return redirect()->route('potensi.index')->with('success', 'Potensi berhasil disimpan.');
     }
 
-    public function show(Potensi $potensi): Response
+    public function show(int $potensi): Response
     {
+        $potensi = $this->ownedPotensi($potensi);
         $potensi->load(['user', 'programPotensi']);
 
         return Inertia::render('Potensi/Show', [
@@ -68,8 +69,9 @@ class PotensiController extends Controller
         ]);
     }
 
-    public function edit(Potensi $potensi): Response
+    public function edit(int $potensi): Response
     {
+        $potensi = $this->ownedPotensi($potensi);
         $potensi->load('programPotensi');
 
         return Inertia::render('Potensi/Edit', [
@@ -77,23 +79,26 @@ class PotensiController extends Controller
         ]);
     }
 
-    public function update(StorePotensiRequest $request, Potensi $potensi): RedirectResponse
+    public function update(StorePotensiRequest $request, int $potensi): RedirectResponse
     {
+        $potensi = $this->ownedPotensi($potensi);
         $potensi->update($request->validated());
         $this->syncProgramPotensi($potensi, $request->input('programs', []));
 
         return redirect()->route('potensi.show', $potensi)->with('success', 'Potensi berhasil diperbarui.');
     }
 
-    public function destroy(Potensi $potensi): RedirectResponse
+    public function destroy(int $potensi): RedirectResponse
     {
+        $potensi = $this->ownedPotensi($potensi);
         $potensi->delete();
 
         return redirect()->route('potensi.index')->with('success', 'Potensi berhasil dihapus.');
     }
 
-    public function downloadSp1(Potensi $potensi)
+    public function downloadSp1(int $potensi)
     {
+        $potensi = $this->ownedPotensi($potensi);
         $potensi->load(['user', 'programPotensi']);
 
         $potensi->update([
@@ -117,13 +122,20 @@ class PotensiController extends Controller
 
     public function export()
     {
-        $potensis = Potensi::with(['programPotensi', 'user'])->get();
+        $potensis = Potensi::where('user_id', Auth::id())
+            ->with(['programPotensi', 'user'])
+            ->get();
 
         if (class_exists(\Maatwebsite\Excel\Facades\Excel::class)) {
-            return \Maatwebsite\Excel\Facades\Excel::download(new PotensiExport($potensis), 'potensi.xlsx');
+            return \Maatwebsite\Excel\Facades\Excel::download(new PotensiExport($potensis), 'Export_Potensi_KSI.xlsx');
         }
 
-        $headings = ['ID', 'Nama Usaha', 'Segmen', 'Program', 'Estimasi TK', 'Estimasi Iuran', 'Alamat', 'Tanggal Input'];
+        $headings = [
+            'Tanggal Input', 'Nama Usaha / Perusahaan', 'NPWP', 'Segmen',
+            'Uraian / Bidang Usaha', 'Alamat Lengkap', 'Latitude', 'Longitude',
+            'Estimasi Tenaga Kerja', 'Estimasi Upah', 'Estimasi Iuran',
+            'Program JKK, JKM, JHT, JP, JKP', 'Status Tindak Lanjut', 'Catatan',
+        ];
 
         $lines = [];
         $lines[] = implode(',', array_map(fn ($h) => '"'.str_replace('"', '""', $h).'"', $headings));
@@ -131,14 +143,20 @@ class PotensiController extends Controller
         foreach ($potensis as $p) {
             $programs = $p->programPotensi->pluck('jenis_program')->join(', ');
             $row = [
-                $p->id,
-                $p->nama_usaha,
-                $p->segmen,
-                $programs,
-                $p->estimasi_tk,
-                $p->estimasi_iuran,
-                $p->alamat,
                 optional($p->tanggal_input)->format('Y-m-d'),
+                $p->nama_usaha ?? '',
+                $p->npwp ?? '',
+                $p->segmen ?? '',
+                $p->uraian ?? '',
+                $p->alamat ?? '',
+                $p->latitude ?? '',
+                $p->longitude ?? '',
+                $p->estimasi_tk ?? '',
+                $p->estimasi_upah ?? '',
+                $p->estimasi_iuran ?? '',
+                $programs,
+                $p->status_tindak_lanjut ?? '',
+                $p->catatan ?? '',
             ];
 
             $lines[] = implode(',', array_map(fn ($c) => '"'.str_replace('"', '""', (string) $c).'"', $row));
@@ -148,7 +166,7 @@ class PotensiController extends Controller
 
         return response($content, 200, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="potensi.xlsx"',
+            'Content-Disposition' => 'attachment; filename="Export_Potensi_KSI.xlsx"',
         ]);
     }
 
@@ -160,7 +178,7 @@ class PotensiController extends Controller
     public function downloadTemplate()
     {
         if (class_exists(\Maatwebsite\Excel\Facades\Excel::class)) {
-            return \Maatwebsite\Excel\Facades\Excel::download(new PotensiTemplateExport, 'template-import-potensi.xlsx');
+            return \Maatwebsite\Excel\Facades\Excel::download(new PotensiTemplateExport, 'Template_Import_Potensi_KSI.xlsx');
         }
 
         // Graceful fallback if the Excel package is unavailable.
@@ -170,7 +188,7 @@ class PotensiController extends Controller
 
         return response($content, 200, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="template-import-potensi.xlsx"',
+            'Content-Disposition' => 'attachment; filename="Template_Import_Potensi_KSI.xlsx"',
         ]);
     }
 
@@ -208,11 +226,13 @@ class PotensiController extends Controller
                         }
                     }
 
-                    // Upsert keyed on NPWP to avoid duplicate business records.
-                    $potensi = Potensi::updateOrCreate(
-                        ['npwp' => $data['npwp']],
-                        $data
-                    );
+                    // Only records with an NPWP can be matched to an existing record.
+                    $potensi = filled($data['npwp'] ?? null)
+                        ? Potensi::updateOrCreate(
+                            ['user_id' => Auth::id(), 'npwp' => $data['npwp']],
+                            $data
+                        )
+                        : Potensi::create($data);
 
                     $this->syncProgramPotensi($potensi, $programs);
 
@@ -253,7 +273,7 @@ class PotensiController extends Controller
     protected function validateImportRow(array $row): array
     {
         $validator = Validator::make($row, [
-            'npwp' => ['required', 'string', 'max:20'],
+            'npwp' => ['nullable', 'string', 'max:20'],
             'tanggal_input' => ['required', 'date'],
             'nama_usaha' => ['required', 'string', 'max:255'],
             'segmen' => ['required', 'in:PU,BPU,Jakon'],
@@ -265,7 +285,7 @@ class PotensiController extends Controller
             'estimasi_upah' => ['required', 'numeric', 'min:0'],
             'estimasi_iuran' => ['required', 'numeric', 'min:0'],
             'programs' => ['nullable', 'array'],
-            'programs.*' => ['string', 'in:JKK,JKM,JHT,JP'],
+            'programs.*' => ['string', 'in:JKK,JKM,JHT,JP,JKP'],
             'status_tindak_lanjut' => ['nullable', 'string', 'max:255'],
             'catatan' => ['nullable', 'string'],
         ], [
@@ -299,7 +319,7 @@ class PotensiController extends Controller
         $validated = $validator->validated();
 
         // Normalize NPWP to 15 digits and enforce the exact length.
-        if (isset($validated['npwp'])) {
+        if (filled($validated['npwp'] ?? null)) {
             $validated['npwp'] = preg_replace('/\D/', '', $validated['npwp']);
 
             $npwpValidator = Validator::make(['npwp' => $validated['npwp']], [
@@ -325,5 +345,10 @@ class PotensiController extends Controller
                 'jenis_program' => $program,
             ]);
         }
+    }
+
+    protected function ownedPotensi(int $id): Potensi
+    {
+        return Potensi::where('user_id', Auth::id())->findOrFail($id);
     }
 }

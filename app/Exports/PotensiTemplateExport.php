@@ -17,49 +17,26 @@ class PotensiTemplateExport implements FromArray, WithHeadings, WithStyles, With
 {
     private const BRAND_GREEN = '0E7C66';
 
-    /**
-     * Sample/example row fill.
-     */
-    private const SAMPLE_FILL = 'EAF7F2';
-
     public function array(): array
     {
-        // One marked example row so users see the expected data shape.
-        return [
-            [
-                '1234567890123452',
-                '2026-09-09',
-                'PT Contoh Usaha',
-                'PU',
-                'Contoh uraian potensi calon peserta.',
-                'Jl. Merdeka No. 1, Jakarta',
-                '-6.2000000',
-                '106.8500000',
-                25,
-                25000000,
-                2500000,
-                'JKK, JHT',
-                'Belum dihubungi',
-                'CONTOH - hapus baris ini sebelum upload.',
-            ],
-        ];
+        return [];
     }
 
     public function headings(): array
     {
         return [
-            'NPWP',
             'Tanggal Input',
-            'Nama Usaha',
+            'Nama Usaha / Perusahaan',
+            'NPWP',
             'Segmen',
-            'Uraian',
-            'Alamat',
+            'Uraian / Bidang Usaha',
+            'Alamat Lengkap',
             'Latitude',
             'Longitude',
-            'Estimasi TK',
+            'Estimasi Tenaga Kerja',
             'Estimasi Upah',
             'Estimasi Iuran',
-            'Program',
+            'Program JKK, JKM, JHT, JP, JKP',
             'Status Tindak Lanjut',
             'Catatan',
         ];
@@ -69,18 +46,18 @@ class PotensiTemplateExport implements FromArray, WithHeadings, WithStyles, With
     {
         // Sensible defaults; AfterSheet refines them by measuring actual content.
         return [
-            'A' => 20,
-            'B' => 14,
-            'C' => 28,
+            'A' => 16,
+            'B' => 30,
+            'C' => 20,
             'D' => 12,
             'E' => 40,
-            'F' => 36,
-            'G' => 12,
-            'H' => 12,
-            'I' => 14,
+            'F' => 38,
+            'G' => 14,
+            'H' => 14,
+            'I' => 22,
             'J' => 16,
             'K' => 16,
-            'L' => 20,
+            'L' => 30,
             'M' => 22,
             'N' => 32,
         ];
@@ -105,17 +82,6 @@ class PotensiTemplateExport implements FromArray, WithHeadings, WithStyles, With
                     'vertical' => Alignment::VERTICAL_CENTER,
                 ],
             ],
-            // Example row readability.
-            2 => [
-                'font' => [
-                    'italic' => true,
-                    'color' => ['rgb' => '5B6B63'],
-                ],
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => self::SAMPLE_FILL],
-                ],
-            ],
         ];
     }
 
@@ -128,8 +94,10 @@ class PotensiTemplateExport implements FromArray, WithHeadings, WithStyles, With
                 // Freeze the header row so it stays visible while scrolling.
                 $sheet->freezePane('A2');
 
+                $sheet->getRowDimension(1)->setRowHeight(30);
                 $this->applyColumnAutoWidths($sheet);
                 $this->applyDataValidations($sheet);
+                $this->addInstructions($sheet);
             },
         ];
     }
@@ -140,7 +108,7 @@ class PotensiTemplateExport implements FromArray, WithHeadings, WithStyles, With
     private function applyColumnAutoWidths(Worksheet $sheet): void
     {
         $lastColumn = 'N';
-        $highestRow = max($sheet->getHighestRow(), 2);
+        $highestRow = max($sheet->getHighestRow(), 1);
 
         foreach (range('A', $lastColumn) as $column) {
             $maxLength = 0;
@@ -164,24 +132,25 @@ class PotensiTemplateExport implements FromArray, WithHeadings, WithStyles, With
     {
         $lastRow = 1000;
 
-        $segmenValidation = $this->makeListValidation('PU,BPU,Jakon', 'Segmen', 'Pilih salah satu: PU, BPU, Jakon');
+        $segmenValidation = $this->makeListValidation('PU,BPU,Jakon', 'Segmen', 'Pilih salah satu: PU, BPU, Jakon', true);
         $sheet->setDataValidation("D2:D{$lastRow}", $segmenValidation);
 
         $statusValidation = $this->makeListValidation(
             'Belum dihubungi,Sudah dihubungi,Jadi peserta,Ditolak',
             'Status Tindak Lanjut',
-            'Pilih salah satu: Belum dihubungi, Sudah dihubungi, Jadi peserta, Ditolak'
+            'Pilih salah satu: Belum dihubungi, Sudah dihubungi, Jadi peserta, Ditolak',
+            true
         );
         $sheet->setDataValidation("M2:M{$lastRow}", $statusValidation);
     }
 
-    private function makeListValidation(string $formula, string $title, string $prompt): DataValidation
+    private function makeListValidation(string $formula, string $title, string $prompt, bool $allowBlank = false): DataValidation
     {
         $validation = new DataValidation();
 
         $validation->setType(DataValidation::TYPE_LIST);
         $validation->setErrorStyle(DataValidation::STYLE_STOP);
-        $validation->setAllowBlank(false);
+        $validation->setAllowBlank($allowBlank);
         $validation->setShowInputMessage(true);
         $validation->setShowErrorMessage(true);
         $validation->setShowDropDown(false); // OOXML inverts this; false shows the arrow.
@@ -192,5 +161,29 @@ class PotensiTemplateExport implements FromArray, WithHeadings, WithStyles, With
         $validation->setFormula1('"'.$formula.'"');
 
         return $validation;
+    }
+
+    private function addInstructions(Worksheet $sheet): void
+    {
+        $notes = [
+            'A1' => 'Wajib diisi dengan format YYYY-MM-DD.',
+            'B1' => 'Wajib diisi.',
+            'C1' => 'Opsional. Isi 15 digit angka jika tersedia.',
+            'D1' => 'Opsional. Pilih PU, BPU, atau Jakon.',
+            'E1' => 'Jelaskan bidang usaha atau uraian potensi.',
+            'F1' => 'Wajib diisi.',
+            'G1' => 'Opsional. Kosongkan jika belum survei lokasi.',
+            'H1' => 'Opsional. Kosongkan jika belum survei lokasi.',
+            'I1' => 'Isi dengan angka jumlah tenaga kerja.',
+            'J1' => 'Isi dengan angka tanpa simbol mata uang.',
+            'K1' => 'Isi dengan angka tanpa simbol mata uang.',
+            'L1' => 'Opsional. Pisahkan program dengan koma, misalnya JKK, JHT.',
+            'M1' => 'Opsional. Pilih status tindak lanjut.',
+            'N1' => 'Opsional. Tambahkan catatan jika diperlukan.',
+        ];
+
+        foreach ($notes as $cell => $text) {
+            $sheet->getComment($cell)->getText()->createTextRun($text);
+        }
     }
 }

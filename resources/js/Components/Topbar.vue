@@ -27,7 +27,13 @@ const crumbs = computed(() => {
 });
 
 const logout = () => {
-    router.post(route('logout'));
+    localStorage.clear();
+    sessionStorage.clear();
+
+    router.post(route('logout'), {
+        preserveState: false,
+        preserveScroll: false,
+    });
 };
 </script>
 

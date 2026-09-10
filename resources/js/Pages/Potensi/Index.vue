@@ -1,5 +1,6 @@
 <script setup>
 import Pagination from '@/Components/Pagination.vue';
+import DownloadTemplateButton from '@/Components/DownloadTemplateButton.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { FileDown, Plus, Search } from '@lucide/vue';
 
@@ -47,6 +48,7 @@ const formatNumber = (value) => Number(value || 0).toLocaleString('id-ID');
             <p class="mt-1 text-sm text-slate-600">Catatan calon peserta BPJS Ketenagakerjaan.</p>
         </div>
         <div class="flex flex-wrap gap-2">
+            <DownloadTemplateButton />
             <a
                 :href="route('potensi.export')"
                 class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
