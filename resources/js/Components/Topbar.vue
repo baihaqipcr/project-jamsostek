@@ -38,12 +38,12 @@ const logout = () => {
 </script>
 
 <template>
-    <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <header class="sticky top-0 z-30 border-b border-white/70 bg-white/55 backdrop-blur-xl">
         <div class="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <div class="flex min-w-0 items-center gap-3">
                 <button
                     type="button"
-                    class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+                    class="interactive-button rounded-lg p-2 text-slate-600 hover:bg-white/70 lg:hidden"
                     @click="showingSidebar = true"
                 >
                     <Menu class="h-5 w-5" />
@@ -71,13 +71,13 @@ const logout = () => {
                 </div>
                 <Link
                     :href="route('profile.edit')"
-                    class="hidden rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 sm:inline-flex"
+                    class="interactive-button hidden rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-white/70 sm:inline-flex"
                 >
                     Profil
                 </Link>
                 <button
                     type="button"
-                    class="inline-flex items-center gap-2 rounded-lg bg-navy-900 px-3 py-2 text-sm font-medium text-white hover:bg-navy-800"
+                    class="interactive-button inline-flex items-center gap-2 rounded-xl bg-[#12342A] px-3 py-2 text-sm font-medium text-white hover:bg-[#087a43]"
                     @click="logout"
                 >
                     <LogOut class="h-4 w-4" />

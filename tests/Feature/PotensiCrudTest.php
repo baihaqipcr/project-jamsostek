@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Potensi;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
 
@@ -35,6 +36,28 @@ class PotensiCrudTest extends TestCase
         $response = $this->actingAs($user)->get('/potensi');
 
         $response->assertOk();
+    }
+
+    public function test_potensi_index_returns_user_scoped_all_and_filtered_aggregates(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        $this->createPotensiForTest($user, 'PU', 'Jadi peserta', 100000, 10);
+        $this->createPotensiForTest($user, 'BPU', 'Ditolak', 200000, 20);
+        $this->createPotensiForTest($otherUser, 'PU', 'Belum dihubungi', 900000, 90);
+
+        $response = $this->actingAs($user)->get('/potensi?segmen=PU&status=Belum%20dihubungi');
+
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Potensi/Index')
+            ->where('aggregates.total_count_all', 2)
+            ->where('aggregates.active_count_all', 1)
+            ->where('aggregates.total_iuran_all', 300000)
+            ->where('aggregates.total_count_filtered', 0)
+            ->where('aggregates.active_count_filtered', 0)
+            ->where('aggregates.total_iuran_filtered', 0)
+        );
     }
 
     public function test_unknown_page_renders_not_found(): void
@@ -335,5 +358,21 @@ class PotensiCrudTest extends TestCase
         $this->assertDatabaseHas('potensi', ['nama_usaha' => 'Usaha Import Satu', 'user_id' => $user->id]);
         $this->assertDatabaseHas('potensi', ['nama_usaha' => 'Usaha Import Dua', 'user_id' => $user->id]);
         $this->assertDatabaseHas('program_potensi', ['jenis_program' => 'JKP']);
+    }
+
+    private function createPotensiForTest(User $user, string $segmen, string $status, int $iuran, int $tenagaKerja): Potensi
+    {
+        return Potensi::create([
+            'user_id' => $user->id,
+            'tanggal_input' => '2026-09-10',
+            'nama_usaha' => 'Usaha Agregasi '.$user->id.'-'.$tenagaKerja,
+            'segmen' => $segmen,
+            'uraian' => 'Uraian agregasi',
+            'alamat' => 'Alamat agregasi',
+            'estimasi_tk' => $tenagaKerja,
+            'estimasi_upah' => $iuran * 10,
+            'estimasi_iuran' => $iuran,
+            'status_tindak_lanjut' => $status,
+        ]);
     }
 }

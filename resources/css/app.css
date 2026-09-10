@@ -4,11 +4,14 @@
 
 @layer base {
     :root {
-        --color-navy: #0b2545;
-        --color-navy-deep: #07192e;
-        --color-teal: #0e7c66;
-        --color-green: #3b6d11;
-        --color-blue: #185fa5;
+        --bpjs-green: #3ab44a;
+        --bpjs-cyan: #05addc;
+        --bpjs-lime: #d6e65d;
+        --color-navy: #12342a;
+        --color-navy-deep: #08251b;
+        --color-teal: #3ab44a;
+        --color-green: #3ab44a;
+        --color-blue: #05addc;
     }
 
     html {
@@ -16,19 +19,185 @@
     }
 
     body {
-        @apply bg-slate-100 text-slate-800 antialiased;
+        @apply text-slate-800 antialiased;
+        background:
+            radial-gradient(circle at 8% 12%, rgba(58, 180, 74, 0.16), transparent 30rem),
+            radial-gradient(circle at 92% 4%, rgba(5, 173, 220, 0.13), transparent 28rem),
+            linear-gradient(135deg, #f8fcf8 0%, #f3f9f7 48%, #f8fbec 100%);
+        background-attachment: fixed;
+    }
+
+    button,
+    a,
+    input,
+    select,
+    textarea {
+        -webkit-tap-highlight-color: transparent;
     }
 }
 
 @layer components {
+    .glass-panel {
+        @apply border border-white/70 bg-white/55 shadow-xl shadow-emerald-950/5 backdrop-blur-xl;
+    }
+
+        .interactive-button {
+            @apply transition duration-200 ease-out active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#05ADDC]/40 focus:ring-offset-2;
+        }
+
+        .card-mode-select {
+            @apply max-w-[7.5rem] rounded-md border-white/70 bg-white/55 px-2 py-1 text-[0.68rem] font-semibold text-[#087a43] shadow-sm outline-none transition focus:border-[#05ADDC] focus:ring-2 focus:ring-[#05ADDC]/30;
+        }
+
     .app-input {
-        @apply w-full rounded-lg border-slate-300 bg-white text-sm text-slate-800 shadow-sm
+        @apply w-full rounded-lg border-white/80 bg-white/70 text-sm text-slate-800 shadow-sm
             transition duration-150
-            focus:border-teal-600 focus:ring-2 focus:ring-teal-600/30;
+            focus:border-[#05ADDC] focus:ring-2 focus:ring-[#05ADDC]/30;
     }
 
     .app-input-error {
         @apply border-red-400 focus:border-red-500 focus:ring-red-500/30;
+    }
+}
+
+.dashboard-hero {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(120deg, #12342a 0%, #087a43 48%, #05addc 140%);
+}
+
+.dashboard-hero-orb {
+    position: absolute;
+    z-index: -1;
+    border-radius: 999px;
+    opacity: 0.65;
+    filter: blur(3px);
+}
+
+.dashboard-hero-orb-one {
+    right: -5rem;
+    top: -9rem;
+    width: 22rem;
+    height: 22rem;
+    border: 3rem solid rgba(214, 230, 93, 0.5);
+}
+
+.dashboard-hero-orb-two {
+    bottom: -8rem;
+    left: 42%;
+    width: 16rem;
+    height: 16rem;
+    background: rgba(5, 173, 220, 0.45);
+}
+
+.hero-mini-stat {
+    min-width: 7.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 1rem;
+    padding: 0.8rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(14px);
+}
+
+.hero-mini-stat span { display: block; color: rgba(255, 255, 255, 0.62); font-size: 0.7rem; }
+.hero-mini-stat strong { display: block; margin-top: 0.2rem; font-size: 1.35rem; }
+.table-row-reveal { animation: table-row-reveal 420ms both; }
+
+@keyframes table-row-reveal {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes splash-enter {
+    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes splash-exit {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-18px) scale(1.02); }
+}
+
+@keyframes ambient-drift {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(18px, -10px, 0) scale(1.08); }
+}
+
+.splash-enter-active { animation: splash-enter 420ms cubic-bezier(.22, 1, .36, 1); }
+.splash-leave-active { animation: splash-exit 500ms cubic-bezier(.22, 1, .36, 1); }
+.ambient-drift { animation: ambient-drift 8s ease-in-out infinite; }
+
+.glass-surface {
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.16));
+    box-shadow: 0 22px 60px rgba(7, 73, 47, 0.14), inset 0 1px rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+}
+
+.reference-stage {
+    background:
+        radial-gradient(circle at 14% 12%, rgba(214, 230, 93, 0.75), transparent 23rem),
+        linear-gradient(135deg, #087a43 0%, #0a9c73 38%, #06afd2 100%);
+}
+
+.reference-orb,
+.reference-orbit {
+    position: absolute;
+    pointer-events: none;
+}
+
+.reference-orb { border-radius: 999px; filter: blur(1px); opacity: 0.9; }
+.reference-orb-green { width: 42rem; height: 42rem; left: -18rem; bottom: -24rem; background: #04a95d; }
+.reference-orb-cyan { width: 38rem; height: 38rem; right: -18rem; bottom: -22rem; background: #04aeda; }
+.reference-orb-lime { width: 26rem; height: 26rem; right: -9rem; top: -15rem; background: #d6e65d; }
+.reference-orbit { border: 5rem solid rgba(214, 230, 93, 0.72); border-radius: 999px; transform: rotate(-24deg); }
+.reference-orbit-one { width: 48rem; height: 18rem; left: -14rem; bottom: -5rem; }
+.reference-orbit-two { width: 42rem; height: 16rem; right: -13rem; top: -7rem; border-color: rgba(5, 173, 220, 0.78); }
+
+.reference-topbar { position: absolute; right: 9%; top: 7%; z-index: 2; border-radius: 1.5rem; padding: 1rem 1.4rem; }
+.reference-stack { position: relative; z-index: 1; width: min(72rem, 94vw); margin: 8vh auto 0; }
+.reference-panel { border-radius: 1.6rem; }
+.reference-panel-back { position: absolute; inset: 5rem 1rem -5rem; transform: rotate(4deg); opacity: 0.38; }
+.reference-panel-main { position: relative; min-height: 19rem; padding: clamp(1.5rem, 5vw, 4rem); transform: rotate(-4deg); }
+.reference-panel-content { position: relative; z-index: 1; }
+.reference-cursor { position: absolute; right: 20%; bottom: 10%; }
+.reference-cursor-ring { position: absolute; inset: -0.8rem; border: 2px solid rgba(5, 173, 220, 0.75); border-radius: 999px; box-shadow: 0 0 22px rgba(5, 173, 220, 0.9); }
+.reference-form-panel { position: relative; width: min(62rem, 88vw); margin: -1.2rem auto 0; padding: clamp(1.25rem, 4vw, 2.5rem); transform: rotate(2deg); }
+.reference-status-dot { width: 0.8rem; height: 0.8rem; border-radius: 999px; background: #05addc; box-shadow: 0 0 18px #05addc; }
+.reference-field { display: flex; align-items: center; justify-content: space-between; min-height: 3rem; padding: 0.75rem 1rem; border: 1px solid rgba(255,255,255,0.75); border-radius: 0.8rem; background: rgba(255,255,255,0.28); color: #27473d; }
+.reference-field i { width: 55%; height: 0.55rem; border-radius: 999px; background: rgba(255,255,255,0.65); }
+.reference-summary { border-radius: 0.9rem; padding: 1rem; background: rgba(255,255,255,0.34); color: #31584a; }
+.reference-summary strong { display: block; color: #159445; font-size: 1.45rem; }
+.reference-pill { border: 1px solid rgba(255,255,255,0.75); border-radius: 999px; padding: 0.55rem 0.8rem; background: rgba(255,255,255,0.24); }
+.reference-footer { position: absolute; left: 6%; bottom: 6%; z-index: 2; display: flex; align-items: center; gap: 0.75rem; border-radius: 1rem; padding: 0.7rem 1rem; color: white; font-size: 0.75rem; }
+
+.brand-lockup { display: inline-flex; align-items: center; gap: 0.8rem; }
+.brand-mark { position: relative; width: 4.4rem; height: 3.4rem; flex: 0 0 auto; }
+.brand-mark span { position: absolute; display: block; border-radius: 60% 40% 60% 40%; transform: skewX(-18deg) rotate(-28deg); }
+.brand-mark-green { left: 0; top: 0.8rem; width: 2.4rem; height: 1.8rem; background: #3ab44a; }
+.brand-mark-lime { left: 1.3rem; top: 0.25rem; width: 0.65rem; height: 2.7rem; background: #d6e65d; border-radius: 80% 20%; }
+.brand-mark-cyan { right: 0; bottom: 0.15rem; width: 2.4rem; height: 1.5rem; background: #05addc; }
+.brand-wordmark { display: flex; flex-direction: column; line-height: 0.92; }
+.brand-wordmark strong { color: #35b44a; font-size: 2.15rem; letter-spacing: 0.06em; }
+.brand-wordmark span { color: #05addc; font-size: 1.2rem; font-weight: 800; }
+.brand-lockup-compact .brand-mark { width: 2.3rem; height: 1.8rem; transform: scale(0.65); transform-origin: left center; }
+
+@media (max-width: 640px) {
+    .reference-stack { margin-top: 11vh; }
+    .reference-panel-main { min-height: 16rem; transform: rotate(-2deg); }
+    .reference-form-panel { width: 92vw; margin-top: -0.2rem; transform: rotate(1deg); }
+    .reference-panel-back { inset: 3rem 0.4rem -3rem; }
+    .reference-footer { left: 1rem; bottom: 1rem; }
+    .brand-wordmark strong { font-size: 1.7rem; }
+    .brand-wordmark span { font-size: 0.9rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
     }
 }
 
@@ -43,6 +212,18 @@
 }
 
 .page-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
+.submenu-enter-active,
+.submenu-leave-active {
+    overflow: hidden;
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.submenu-enter-from,
+.submenu-leave-to {
     opacity: 0;
     transform: translateY(-6px);
 }

@@ -21,9 +21,8 @@ class PotensiController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = Potensi::where('user_id', Auth::id())
-            ->with(['user', 'programPotensi'])
-            ->latest();
+        $baseQuery = Potensi::where('user_id', Auth::id());
+        $query = clone $baseQuery;
 
         if ($request->filled('segmen')) {
             $query->where('segmen', $request->string('segmen'));
@@ -33,8 +32,25 @@ class PotensiController extends Controller
             $query->where('status_tindak_lanjut', $request->string('status'));
         }
 
+        $filteredAggregates = (clone $query)
+            ->selectRaw("COUNT(*) as total_count, SUM(CASE WHEN status_tindak_lanjut = 'Jadi peserta' THEN 1 ELSE 0 END) as active_count, COALESCE(SUM(estimasi_iuran), 0) as total_iuran")
+            ->first();
+        $allAggregates = $baseQuery
+            ->selectRaw("COUNT(*) as total_count, SUM(CASE WHEN status_tindak_lanjut = 'Jadi peserta' THEN 1 ELSE 0 END) as active_count, COALESCE(SUM(estimasi_iuran), 0) as total_iuran")
+            ->first();
+
+        $query->with(['user', 'programPotensi'])->latest();
+
         return Inertia::render('Potensi/Index', [
             'potensis' => $query->paginate(10)->withQueryString(),
+            'aggregates' => [
+                'total_count_all' => (int) $allAggregates->total_count,
+                'active_count_all' => (int) $allAggregates->active_count,
+                'total_iuran_all' => (float) $allAggregates->total_iuran,
+                'total_count_filtered' => (int) $filteredAggregates->total_count,
+                'active_count_filtered' => (int) $filteredAggregates->active_count,
+                'total_iuran_filtered' => (float) $filteredAggregates->total_iuran,
+            ],
             'filters' => [
                 'segmen' => $request->string('segmen')->toString(),
                 'status' => $request->string('status')->toString(),
