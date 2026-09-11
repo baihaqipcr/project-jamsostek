@@ -25,7 +25,13 @@ class RegistrationTest extends TestCase
             'password_confirmation' => 'password',
         ]);
 
+        $user = \App\Models\User::query()->where('email', 'test@example.com')->first();
+
+        $this->assertNotNull($user);
         $this->assertAuthenticated();
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@example.com',
+        ]);
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 }

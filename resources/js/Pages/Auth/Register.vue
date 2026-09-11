@@ -14,9 +14,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
-    });
+    form.post(route('register'));
 };
 </script>
 
@@ -62,43 +60,33 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="auth-reveal auth-delay-4 mt-4">
-                <InputLabel for="password" value="Kata Sandi" class="auth-label" />
+            <div class="auth-reveal auth-delay-4 mt-6 flex flex-col gap-4">
+                <div>
+                    <InputLabel for="password" value="Kata sandi" class="auth-label" />
+                    <TextInput
+                        id="password"
+                        type="password"
+                        class="auth-input mt-1 block w-full"
+                        v-model="form.password"
+                        required
+                        autocomplete="new-password"
+                    />
+                    <InputError class="mt-2" :message="form.errors.password" />
+                </div>
 
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="auth-input mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="new-password"
-                />
+                <div>
+                    <InputLabel for="password_confirmation" value="Konfirmasi kata sandi" class="auth-label" />
+                    <TextInput
+                        id="password_confirmation"
+                        type="password"
+                        class="auth-input mt-1 block w-full"
+                        v-model="form.password_confirmation"
+                        required
+                        autocomplete="new-password"
+                    />
+                    <InputError class="mt-2" :message="form.errors.password_confirmation" />
+                </div>
 
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="auth-reveal auth-delay-5 mt-4">
-                <InputLabel
-                    for="password_confirmation"
-                    value="Konfirmasi Kata Sandi"
-                />
-
-                <TextInput
-                    id="password_confirmation"
-                    type="password"
-                    class="auth-input mt-1 block w-full"
-                    v-model="form.password_confirmation"
-                    required
-                    autocomplete="new-password"
-                />
-
-                <InputError
-                    class="mt-2"
-                    :message="form.errors.password_confirmation"
-                />
-            </div>
-
-            <div class="auth-reveal auth-delay-6 mt-6 flex flex-col gap-4">
                 <div class="flex flex-col-reverse items-center justify-between gap-3 sm:flex-row">
                 <Link
                     :href="route('login')"

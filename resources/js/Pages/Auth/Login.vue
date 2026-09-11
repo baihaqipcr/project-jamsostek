@@ -45,7 +45,7 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div class="auth-reveal auth-delay-2">
-                <InputLabel for="email" value="Email (KSI)" class="auth-label" />
+                <InputLabel for="email" value="Email" class="auth-label" />
                 <TextInput
                     id="email"
                     type="email"
