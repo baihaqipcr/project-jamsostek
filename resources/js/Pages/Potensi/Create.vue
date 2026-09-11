@@ -37,12 +37,12 @@ const submit = () => {
         </Link>
     </div>
 
-    <form class="rounded-2xl border border-slate-200 bg-white p-6 shadow-card" @submit.prevent="submit">
+    <form class="form-shell" @submit.prevent="submit">
         <FormFields :form="form" />
         <div class="mt-6 flex justify-end">
             <button
                 type="submit"
-                class="rounded-lg bg-brand-teal px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+                class="magnetic-save-button"
                 :disabled="form.processing"
             >
                 Simpan Potensi

@@ -34,7 +34,7 @@ class StorePotensiRequest extends FormRequest
             'estimasi_upah' => ['required', 'numeric', 'min:0'],
             'estimasi_iuran' => ['required', 'numeric', 'min:0'],
             'programs' => ['nullable', 'array'],
-            'programs.*' => ['string', 'in:JKK,JKM,JHT,JP'],
+            'programs.*' => ['string', 'in:JKK,JKM,JHT,JP,JKP'],
             'status_tindak_lanjut' => ['nullable', 'string', 'max:255'],
             'catatan' => ['nullable', 'string'],
         ];
