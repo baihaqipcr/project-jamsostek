@@ -34,12 +34,6 @@ const links = computed(() => [
         active: currentPath.value === '/potensi/import',
         icon: FileUp,
     },
-    {
-        label: 'Profil Petugas',
-        href: route('profile.edit'),
-        active: currentPath.value === '/profile',
-        icon: UserRound,
-    },
 ]);
 
 const togglePotensi = () => {
